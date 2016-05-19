@@ -62,11 +62,8 @@ void Doc2Vec::initNegTable()
   }
 }
 
-void Doc2Vec::train(const char * train_file,
-  int dim, int cbow, int hs, int negtive,
-  int iter, int window,
-  real alpha, real sample,
-  int min_count, int threads)
+void Doc2Vec::train(const char * train_file, int dim, int cbow, int hs, int negtive,
+		    int iter, int window, real alpha, real sample, int min_count, int threads, bool fix_words, const char * model_file)
 {
   printf("Starting training using file %s\n", train_file);
   m_cbow = cbow;
@@ -77,10 +74,17 @@ void Doc2Vec::train(const char * train_file,
   m_sample = sample;
   m_iter = iter;
 
-  m_word_vocab = new Vocabulary(train_file, min_count);
-  m_doc_vocab = new Vocabulary(train_file, 1, true);
-  m_nn = new NN(m_word_vocab->m_vocab_size, m_doc_vocab->m_vocab_size, dim, hs, negtive);
-  if(m_negtive > 0) initNegTable();
+  if (!fix_words){
+    m_word_vocab = new Vocabulary(train_file, min_count);
+    m_doc_vocab = new Vocabulary(train_file, 1, true);
+    m_nn = new NN(m_word_vocab->m_vocab_size, m_doc_vocab->m_vocab_size, dim, hs, negtive);
+    if(m_negtive > 0) initNegTable();
+  } else{
+    FILE * fout = fopen(model_file, "rb");
+    load(fout);
+    m_doc_vocab = new Vocabulary(train_file, 1, true);
+    m_nn = new NN(m_word_vocab->m_vocab_size, m_doc_vocab->m_vocab_size, dim, hs, negtive, fix_words);
+  }
 
   m_brown_corpus = new TaggedBrownCorpus(train_file);
   m_alpha = alpha;

@@ -9,7 +9,7 @@ OBJS = train.o Doc2Vec.o TrainModelThread.o Vocab.o NN.o TaggedBrownCorpus.o WMD
 all: ${TARGET}
 
 clean:
-	rm -f *.o $(TARGET)
+	rm -f *~ *.o $(TARGET)
 
 ${TARGET} : $(OBJS)
 	$(GCC) $(CPPFLAGS) $^ $(LIBDIR) -o $@
